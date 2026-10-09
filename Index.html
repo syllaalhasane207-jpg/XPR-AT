@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Botsmith</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="light dark">
+<style>
+/* Accent: swap --ac for teal (#00796B light / #3DD6C0 dark) if you prefer */
+:root{--ac:#0062D6;--on:#fff;--l1:#000;--l2:rgba(60,60,67,.68);--l3:rgba(60,60,67,.3);--c1:#7AA7FF;--c2:#FF9AC8;--c3:#55E0C8;--c4:#B08CFF;--b0:#E6ECFB;--gl:rgba(255,255,255,.5);--gb:rgba(255,255,255,.65);--hl:rgba(255,255,255,.95);--sd:rgba(30,40,90,.22);--gr:rgba(255,255,255,.74);--sep:rgba(60,60,67,.16);--fill:rgba(120,120,128,.16);--seg:#fff;--lens:rgba(255,255,255,.62);--code:rgba(12,16,34,.92);
+--sp:cubic-bezier(.34,1.56,.64,1);--font:-apple-system,"SF Pro Display","SF Pro Text",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,monospace}
+@supports (transition-timing-function:linear(0,1)){:root{--sp:linear(0,.2 5%,.58 11%,.92 18%,1.1 25%,1.13 30%,1.07 38%,1.01 48%,.99 60%,1)}}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ac:#3D9AFF;--on:#00152E;--l1:#fff;--l2:rgba(235,235,245,.68);--l3:rgba(235,235,245,.3);--c1:#2F5BFF;--c2:#B0267B;--c3:#0E9C86;--c4:#6A3BD8;--b0:#070A18;--gl:rgba(44,48,78,.5);--gb:rgba(255,255,255,.15);--hl:rgba(255,255,255,.3);--sd:rgba(0,0,0,.55);--gr:rgba(38,42,68,.68);--sep:rgba(235,235,245,.16);--fill:rgba(120,120,128,.32);--seg:rgba(110,110,118,.75);--lens:rgba(255,255,255,.16)}}
+:root[data-theme="dark"]{--ac:#3D9AFF;--on:#00152E;--l1:#fff;--l2:rgba(235,235,245,.68);--l3:rgba(235,235,245,.3);--c1:#2F5BFF;--c2:#B0267B;--c3:#0E9C86;--c4:#6A3BD8;--b0:#070A18;--gl:rgba(44,48,78,.5);--gb:rgba(255,255,255,.15);--hl:rgba(255,255,255,.3);--sd:rgba(0,0,0,.55);--gr:rgba(38,42,68,.68);--sep:rgba(235,235,245,.16);--fill:rgba(120,120,128,.32);--seg:rgba(110,110,118,.75);--lens:rgba(255,255,255,.16)}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){:root{--gl:#F5F7FC;--gr:#fff;--gb:rgba(60,60,67,.45);--lens:#DDE6F8;--l2:rgba(60,60,67,.85)}.glass,.glass:before,.grp,.top:before{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+@media(prefers-color-scheme:dark) and ((prefers-reduced-transparency:reduce) or (prefers-contrast:more)){:root:not([data-theme="light"]){--gl:#1C2038;--gr:#1C2038;--gb:rgba(255,255,255,.45);--lens:#39406A;--l2:rgba(235,235,245,.85)}}
+*,*:before,*:after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--l1);background:var(--b0);font:17px/1.35 var(--font);overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--b0)}
+.bg i{position:absolute;width:70vmax;height:70vmax;border-radius:50%;filter:blur(70px);opacity:.8}
+.bg i:nth-child(1){background:var(--c1);left:-25vmax;top:-20vmax}.bg i:nth-child(2){background:var(--c2);right:-30vmax;top:20vh}
+.bg i:nth-child(3){background:var(--c3);left:-20vmax;bottom:-30vmax}.bg i:nth-child(4){background:var(--c4);right:-10vmax;bottom:-35vmax;opacity:.6}
+.glass{position:relative;background:var(--gl);-webkit-backdrop-filter:blur(24px) saturate(1.7);backdrop-filter:blur(24px) saturate(1.7);border:1px solid var(--gb);box-shadow:inset 0 1px 0 var(--hl),0 10px 32px var(--sd)}
+.glass:after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,transparent calc(var(--sh,30%) - 18%),rgba(255,255,255,.3) var(--sh,30%),transparent calc(var(--sh,30%) + 18%));opacity:.7}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;min-height:44px;transition:scale .4s var(--sp),filter .2s;-webkit-tap-highlight-color:transparent}
+button:active{scale:.96;filter:brightness(1.15)}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.grp :focus-visible{outline-offset:-3px}
+.top{position:fixed;z-index:20;top:0;left:0;right:0;height:calc(44px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:17px}
+.top:before{content:"";position:absolute;inset:0;background:var(--gl);-webkit-backdrop-filter:blur(24px) saturate(1.7);backdrop-filter:blur(24px) saturate(1.7);border-bottom:1px solid var(--gb);box-shadow:inset 0 1px 0 var(--hl),0 4px 20px var(--sd);opacity:0;transition:opacity .25s}
+.top.sc:before{opacity:1}
+#tt{position:relative;opacity:0;transition:opacity .25s}.top.sc #tt{opacity:1}
+.app{max-width:600px;margin:0 auto;padding:calc(52px + env(safe-area-inset-top,0px)) 16px calc(120px + env(safe-area-inset-bottom,0px))}
+.tp[hidden]{display:none}
+.tp.on{animation:in .28s cubic-bezier(.2,.8,.2,1) backwards}.tp.out{animation:out .12s ease-in forwards}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}@keyframes out{to{opacity:0;transform:translateY(-6px)}}
+.lt{font-size:34px;line-height:41px;font-weight:700;letter-spacing:.37px;margin:8px 0 8px}
+.gh{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--l2);margin:24px 16px 8px}
+.gf{font-size:13px;line-height:18px;color:var(--l2);margin:8px 16px 0}
+.grp{background:var(--gr);border:1px solid var(--gb);border-radius:24px;overflow:hidden;box-shadow:inset 0 1px 0 var(--hl),0 6px 20px var(--sd)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:52px;width:100%;padding:8px 16px;border-bottom:.5px solid var(--sep);text-align:left}
+.row:last-child{border:0}.row.col{flex-wrap:wrap}.row.col .seg{flex-basis:100%}
+.rl{flex:1;min-width:0;display:flex;flex-direction:column}.rh{font-size:13px;line-height:18px;color:var(--l2)}
+.rv{color:var(--l2);text-align:right}.chv{color:var(--l3);flex:none}.rb span.rv{flex:none}
+.ti,textarea{font:inherit;color:inherit;background:none;border:0}
+.ti{text-align:right;flex:1;min-width:0;min-height:44px}
+textarea{display:block;width:100%;min-height:104px;padding:16px;resize:none}
+::placeholder{color:var(--l2)}
+.stp{display:flex;align-items:center;background:var(--fill);border-radius:12px;flex:none}
+.stp input{width:60px;min-height:44px;text-align:center;background:none;border:0;font:inherit;color:inherit;-moz-appearance:textfield}
+.stp input::-webkit-inner-spin-button{-webkit-appearance:none}
+.sb{width:44px;font-size:22px;color:var(--ac);border-radius:10px}
+.seg{display:flex;background:var(--fill);border-radius:14px;padding:2px;gap:2px}
+.seg button{flex:1;min-height:44px;border-radius:12px;font-size:15px;font-weight:500;padding:0 8px;transition:background .3s,scale .4s var(--sp)}
+.seg [aria-checked=true],.seg [aria-selected=true]{background:var(--seg);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+.sw{appearance:none;-webkit-appearance:none;width:51px;height:31px;border-radius:99px;background:var(--fill);position:relative;flex:none;margin:0;cursor:pointer;transition:background .3s}
+.sw:before{content:"";position:absolute;left:2px;top:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:transform .45s var(--sp)}
+.sw:checked{background:var(--ac)}.sw:checked:before{transform:translateX(20px)}
+label.row{cursor:pointer}
+.pb{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;margin-top:16px;border-radius:999px;background:var(--ac);color:var(--on);font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 20px color-mix(in srgb,var(--ac) 35%,transparent)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);opacity:0}
+.pane{--gl:rgba(30,36,64,.55);--l1:#fff;--l2:rgba(235,235,245,.7);--fill:rgba(120,120,128,.36);--seg:rgba(130,130,140,.6);--gb:rgba(255,255,255,.16);--hl:rgba(255,255,255,.3);--ac:#6CB0FF;position:relative;margin-top:8px;border-radius:24px;overflow:hidden;background:var(--code);color:#fff;box-shadow:0 12px 36px var(--sd)}
+.ph{position:absolute;z-index:2;top:8px;left:8px;right:8px;border-radius:18px;padding:6px;display:flex;align-items:center;gap:6px}
+.ph .seg{flex:1;min-width:0}
+.ib{width:44px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--fill)}
+.cd{margin:0;padding:80px 0 16px;max-height:62vh;overflow:auto;font:12.5px/1.6 var(--mono);counter-reset:ln;color:#E3E9F7}
+.l{display:block;white-space:pre;width:max-content;min-width:100%;padding-right:16px}
+.l:before{counter-increment:ln;content:counter(ln);display:inline-block;width:40px;margin-right:16px;text-align:right;color:rgba(235,235,245,.4);user-select:none}
+.l:empty:after{content:" "}
+svg.ic{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card{white-space:pre-wrap;padding:4px 0;font-size:16px}.hide{display:none}
+.bar{position:fixed;z-index:30;left:16px;right:16px;max-width:420px;margin:0 auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));height:64px;padding:4px;border-radius:32px;display:grid;grid-template-columns:repeat(5,1fr);transform-origin:50% 100%;transition:scale .3s cubic-bezier(.2,.8,.2,1)}
+.bar.sm{scale:.9}
+.lens{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/5);border-radius:28px;background:var(--lens);-webkit-backdrop-filter:blur(20px) saturate(1.8);backdrop-filter:blur(20px) saturate(1.8);box-shadow:inset 0 1px 0 var(--hl),0 2px 10px rgba(0,0,0,.14);transform:translateX(calc(var(--i,0)*100%));transition:transform .42s var(--sp);will-change:transform}
+.tb{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;border-radius:28px;font-size:11px;font-weight:600;color:var(--l2);transition:color .25s,scale .4s var(--sp)}
+.tb[aria-selected=true]{color:var(--ac)}
+.toast{position:fixed;z-index:40;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px) + 76px);translate:-50% 12px;opacity:0;pointer-events:none;padding:12px 20px;border-radius:999px;font-weight:600;transition:opacity .25s,translate .45s var(--sp)}
+.toast.on{opacity:1;translate:-50% 0}
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(0,10,30,.35);opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+.scrim.on{opacity:1;visibility:visible;transition-delay:0s}
+.sheet{position:fixed;z-index:60;left:0;right:0;bottom:0;max-width:600px;margin:0 auto;max-height:82vh;overflow:auto;border-radius:32px 32px 0 0;padding:0 16px calc(24px + env(safe-area-inset-bottom,0px));transform:translateY(110%);visibility:hidden;transition:transform .5s var(--sp),visibility 0s .5s}
+.sheet.open{transform:none;visibility:visible;transition-delay:0s}
+.sheet h2{font-size:20px;font-weight:700;margin:0 0 8px}
+.hd{display:grid;place-items:center;height:36px;margin:0 -16px;touch-action:none;cursor:grab}.hd i{width:36px;height:5px;border-radius:3px;background:var(--l3)}
+.pick{display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 16px;min-height:52px;text-align:left;border-bottom:.5px solid var(--sep)}
+.pick:last-child{border:0}.pick[aria-checked=true]{color:var(--ac);font-weight:600}.pick[aria-checked=true]:after{content:"\2713"}
+.dn{background:var(--fill);border-radius:999px;width:100%;margin-top:16px;font-weight:600}
+
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 6px;flex:1;min-width:0}.chips.wrap{flex-wrap:wrap;overflow:visible}
+.row.col .chips{flex-basis:100%}
+.chip{flex:none;min-height:44px;padding:0 16px;border-radius:22px;background:var(--fill);font-size:15px;font-weight:500;white-space:nowrap}
+.chip[aria-checked=true]{background:var(--ac);color:var(--on);font-weight:600}
+.sk{flex:none;width:84px;padding:6px 4px;border-radius:20px;display:flex;flex-direction:column;align-items:center;font-size:12px;font-weight:600;min-height:44px}
+.sk .sv{display:block;width:56px;height:56px}
+.sk[aria-checked=true]{background:var(--seg);box-shadow:inset 0 1px 0 var(--hl),0 4px 14px var(--sd)}
+.swt{width:44px;padding:0;border-radius:50%}.swt i{display:block;width:32px;height:32px;margin:auto;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}.swt[aria-checked=true] i{box-shadow:0 0 0 3px var(--ac)}
+.ci{width:44px;height:44px;flex:none;padding:4px;border:0;background:none;border-radius:12px;cursor:pointer}
+.rng{width:150px;min-height:44px;accent-color:var(--ac)}
+.avc{border-radius:32px;margin-top:8px;padding:16px;display:grid;place-items:center}
+.avb{width:min(260px,72vw);aspect-ratio:1;padding:0;border-radius:28px}.avb svg{width:100%;height:100%;overflow:visible}
+.bub{position:absolute;z-index:3;top:12px;right:12px;max-width:56%;padding:10px 14px;text-align:left;font-size:14px;line-height:19px;border-radius:20px 20px 6px 20px;background:var(--gr);border:1px solid var(--gb);box-shadow:0 6px 18px var(--sd);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}.bub[hidden]{display:none}
+.dots i{display:inline-block;width:8px;height:8px;margin:0 2px;border-radius:50%;background:var(--l2);animation:dt 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes dt{40%{transform:translateY(-5px)}}
+.agn{text-align:center;font-weight:600;margin:12px 0 0}
+#ab{transform-origin:100px 178px;animation:bob 3.6s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-5px)}}
+#ab.wig{animation:wig .6s var(--sp)}@keyframes wig{25%{transform:rotate(-9deg)}55%{transform:rotate(7deg)}80%{transform:rotate(-3deg)}}
+#sh{transform-origin:100px 178px;transition:transform .3s var(--sp)}
+.eyes{animation:bl 5s infinite;transform-box:fill-box;transform-origin:center}@keyframes bl{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.br{display:flex;gap:8px;margin-top:24px}.br button{flex:1;min-height:50px;border-radius:999px;background:var(--fill);font-weight:600}.br .pb{margin:0;flex:1.4;background:var(--ac)}
+.log{display:flex;flex-direction:column;gap:8px;margin:12px 0;max-height:36vh;overflow:auto}.log:empty:before{content:"Say hi, or tap a question above.";color:var(--l2);font-size:15px}
+.msg{padding:10px 14px;max-width:88%;font-size:15px;line-height:20px;white-space:pre-wrap}
+.msg.you{align-self:flex-end;background:var(--ac);color:var(--on);border-radius:18px 18px 6px 18px}.msg.bot{align-self:flex-start;background:var(--gr);border:1px solid var(--gb);border-radius:18px 18px 18px 6px}
+.send{display:flex;gap:8px}.qi{flex:1;min-width:0;min-height:48px;padding:0 16px;border-radius:999px;border:1px solid var(--gb);background:var(--gr);font:inherit;color:inherit}
+.sn{min-height:48px;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--on);font-weight:600}
+#tm{position:absolute;left:16px;top:calc(env(safe-area-inset-top,0px) + 6px);width:32px;height:32px}#tm svg{width:100%;height:100%;display:block}
+
+.lime{--ac:#C8F53C;--on:#0B0B0C;--l1:#fff;--l2:rgba(255,255,255,.66);--l3:rgba(255,255,255,.3);--gr:#16171A;--gl:rgba(14,15,17,.88);--gb:rgba(255,255,255,.09);--fill:rgba(255,255,255,.1);--seg:rgba(255,255,255,.18);--sep:rgba(255,255,255,.08);--hl:rgba(255,255,255,.16);--sd:rgba(0,0,0,.45);color:#fff}
+.stage{position:relative;overflow:hidden;margin-top:8px;padding:20px 16px 24px;border-radius:36px;background:#0B0B0C;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 24px 56px rgba(0,0,0,.35)}
+.stage:before{content:"";position:absolute;left:-70px;top:230px;width:280px;height:280px;background:radial-gradient(closest-side,rgba(200,245,60,.22),transparent);pointer-events:none}
+.stage>*:not(.cnt){position:relative;z-index:1}.cnt{position:absolute;top:-12px;right:-60px;width:260px;pointer-events:none}
+.sbar{display:flex;align-items:center;gap:12px}.pill{padding:6px 14px;border-radius:999px;background:var(--ac);color:var(--on);font-size:13px;font-weight:600}
+.st2{font-size:13px;color:var(--l2)}.st2:before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:var(--ac)}
+.stage .avc{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;justify-items:stretch;padding:8px 0 0;margin:0}.stage .avb{width:min(170px,46vw)}.stage .bub{position:relative;top:auto;right:auto;max-width:none;font-size:13px;line-height:18px;-webkit-line-clamp:5;border-radius:20px 20px 20px 6px}.stage .agn{margin:0;text-align:left;font-size:20px;font-weight:700}
+.hl{font-size:30px;line-height:1.15;font-weight:300;letter-spacing:-.3px;margin:20px 0}
+.tiles{display:grid;grid-template-columns:1.1fr 1fr;gap:12px}
+.tile{position:relative;min-height:112px;padding:16px;border-radius:24px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;text-align:left;color:#0B0B0C;font-weight:600;font-size:16px;line-height:1.2}
+.tile.lm{grid-row:1/3;min-height:236px;background:#C8F53C;font-size:28px;font-weight:500}.tile.pu{background:#C4A8FF}.tile.pk{background:#FFC4DC}
+.tile .ti{position:absolute;left:14px;top:14px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.12);display:grid;place-items:center}
+.tile svg.ic{width:20px;height:20px;stroke-width:2}.tile .ta{position:absolute;right:14px;top:14px}
+.hh{display:flex;align-items:center;justify-content:space-between;margin-top:24px}.gh2{font-size:17px;font-weight:600;margin:24px 0 8px}
+.lnk{padding:0 4px;color:var(--l2);font-size:15px}
+.hl2{display:grid;gap:8px;margin-top:8px}.hl2:empty:before{content:"No instructions yet. Open Manage bot and tell your agent what to change.";color:var(--l2);font-size:14px;padding:4px}
+.hr{display:flex;align-items:center;gap:12px;min-height:56px;width:100%;padding:8px 12px;border-radius:16px;background:var(--gr);border:1px solid var(--gb);text-align:left}
+.hi{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#0B0B0C;background:#C8F53C}.hi.mid{background:#C4A8FF}.hi.bad{background:#FFC4DC}
+.ht{flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hs{font-size:12px;color:var(--l2)}
+.bk{display:flex;align-items:center;gap:8px;margin-top:16px}.back{display:inline-flex;align-items:center;gap:2px;padding:0 12px 0 0;color:var(--ac);font-weight:600}.back .ic{width:22px;height:22px}.mh2{margin:0;font-size:22px;font-weight:700}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{display:flex;flex-direction:column;min-height:108px;padding:14px;border-radius:20px;background:var(--gr);border:1px solid var(--gb)}
+.stat small{font-size:13px;color:var(--l2)}.stat b{margin-top:auto;font-size:21px;line-height:1.15}.stat i{font-style:normal;font-size:13px;font-weight:600;color:var(--ac)}.stat.w i{color:#F4B860}.stat.h i{color:#FF9DBB}
+.cl{list-style:none;margin:4px 0 0;padding:0;font-size:14px;line-height:20px;flex-basis:100%}
+#ins{min-height:96px}#insgo[disabled]{opacity:.6}
+.va{animation:in .28s cubic-bezier(.2,.8,.2,1) backwards}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.glass:after{opacity:0}}
+</style></head>
+<body>
+<div class="bg" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="rf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".015 .03" numOctaves="1" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="14" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<header class="top" id="top"><span id="tm" aria-hidden="true"></span><span id="tt">Build</span></header>
+<main class="app">
+<section id="p0" class="tp on" role="tabpanel" aria-labelledby="k0">
+ <h1 class="lt">Build</h1>
+ <h2 class="gh">Describe it</h2>
+ <div class="grp"><textarea id="idea" aria-label="Strategy idea" placeholder="Example: buy dips in an uptrend using RSI, risk 1% per trade, only trade the London session"></textarea></div>
+ <p class="gf">Plain English is fine. Mention the signal, your risk and your trading hours.</p>
+ <button class="pb" id="ai">Fill settings with AI</button>
+ <p class="gf" id="st" role="status">Or skip this and set the rules by hand below. The defaults already make a working bot.</p>
+ <div id="b0"></div>
+</section>
+<section id="p1" class="tp" role="tabpanel" aria-labelledby="k1" hidden><h1 class="lt">Risk</h1><div id="r0"></div></section>
+<section id="p2" class="tp" role="tabpanel" aria-labelledby="k2" hidden>
+ <h1 class="lt">Code</h1>
+ <div class="pane">
+  <div class="ph glass"><div class="seg" role="tablist" aria-label="Platform"><button id="t1" role="tab">TradingView</button><button id="t2" role="tab">MetaTrader 5</button></div>
+   <button class="ib" id="cp" aria-label="Copy code" title="Copy code"><svg class="ic" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="3"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg></button>
+   <button class="ib" id="dl" aria-label="Download file" title="Download file"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5 4.5-4.5M5 20h14"/></svg></button></div>
+  <pre id="code" class="cd" tabindex="0" aria-label="Generated code"></pre>
+ </div>
+ <p class="gf" id="fn"></p><p class="gf" id="how"></p>
+</section>
+<section id="p3" class="tp" role="tabpanel" aria-labelledby="k3" hidden>
+ <h1 class="lt">Review</h1>
+ <h2 class="gh">Your bot at a glance</h2><div class="grp" id="sum"></div>
+ <button class="pb" id="rv">Review risks with AI</button>
+ <p class="gf">Reads your settings like a cautious risk manager and opens the result in a sheet.</p>
+ <h2 class="gh">Read this first</h2>
+ <div class="grp"><div class="row"><div class="rl"><span class="rh" style="font-size:15px;line-height:21px;color:var(--l1)">TradingView cannot place MetaTrader orders on its own. Run the MT5 version directly in MetaTrader, or send TradingView alerts through a third-party webhook bridge.</span></div></div>
+ <div class="row"><div class="rl"><span class="rh" style="font-size:15px;line-height:21px;color:var(--l1)">Always test in each platform's strategy tester and on a demo account first. Past results do not predict future profit, and this is not financial advice.</span></div></div></div>
+</section>
+<section id="p4" class="tp" role="tabpanel" aria-labelledby="k4" hidden>
+ <h1 class="lt">Agent</h1>
+ <div class="stage lime">
+  <svg class="cnt" viewBox="0 0 240 140" aria-hidden="true"><g fill="none" stroke="#fff" stroke-opacity=".14" transform="rotate(-18 120 70)"><ellipse cx="120" cy="70" rx="112" ry="48"/><ellipse cx="120" cy="70" rx="94" ry="38"/><ellipse cx="120" cy="70" rx="76" ry="28"/><ellipse cx="120" cy="70" rx="58" ry="19"/></g></svg>
+  <div class="sbar"><span class="pill" id="pl">Strategy Scout</span><span class="st2">Ready</span></div>
+  <div class="avc"><button class="bub" id="bub" hidden aria-label="Open conversation"></button>
+   <button class="avb" id="avb" aria-label="Tap your agent to say hi"><svg id="av" viewBox="0 0 200 200" aria-hidden="true"><g id="gl"></g><ellipse cx="100" cy="182" rx="64" ry="8" fill="#000" opacity=".1"/><g id="ab"><g id="sh"></g></g></svg></button></div>
+  <p class="agn" id="agn"></p>
+  <div id="v0" class="va">
+   <h2 class="hl">How may I help you today?</h2>
+   <div class="tiles">
+    <button class="tile lm" id="tMan"><span class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg></span><svg class="ic ta" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>Manage<br>bot</button>
+    <button class="tile pu" id="tCre"><span class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><svg class="ic ta" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>Create</button>
+    <button class="tile pk" id="tk2"><span class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14v10H10l-4 3v-3H5z"/></svg></span><svg class="ic ta" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg><span id="tk">Chat with Buddy</span></button>
+   </div>
+   <div class="hh"><h2 class="gh2" style="margin:0">History</h2><button class="lnk" id="hAll" hidden>See all</button></div>
+   <div class="hl2" id="hist"></div>
+  </div>
+  <div id="v1" hidden><div class="bk"><button class="back" data-v="0"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Agent</button><h2 class="mh2">Create</h2></div><div id="a0"></div></div>
+  <div id="v2" hidden>
+   <div class="bk"><button class="back" data-v="0"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Agent</button><h2 class="mh2">Manage bot</h2></div>
+   <h3 class="gh2">Bot status</h3><div class="stats" id="stats"></div>
+   <h3 class="gh2">Give instructions</h3>
+   <div class="grp"><textarea id="ins" aria-label="Instruction for your agent" maxlength="300" placeholder="e.g. Lower my risk to 0.5% and only trade 7 to 16"></textarea></div>
+   <p class="gf">Plain English works. Your agent changes the settings, and the code updates straight away.</p>
+   <div class="chips" id="iq" style="margin-top:12px"><button class="chip" data-q="Lower my risk per trade by half.">Lower my risk</button><button class="chip" data-q="Only trade from 7 to 16.">Trade 7 to 16</button><button class="chip" data-q="Make it long only.">Long only</button><button class="chip" data-q="Use a wider stop loss.">Wider stop</button></div>
+   <button class="pb" id="insgo"><svg class="ic" viewBox="0 0 24 24" style="margin-right:8px"><path d="M3 11v2M7 7v10M11 4v16M15 8v8M19 10v4"/></svg>Send instruction</button>
+   <p class="gf" id="ist" role="status">Waiting for your instruction.</p>
+   <div class="grp" id="chg" hidden><div class="row col"><div class="rl"><span class="rt">Last change</span></div><button class="chip" id="undo">Undo</button><ul class="cl" id="cl"></ul></div></div>
+   <div class="br"><button id="gCode">View code</button><button id="gRev">Review risks</button></div>
+   <h3 class="gh2">History</h3><div class="hl2" id="hist2"></div>
+  </div>
+ </div>
+</section>
+</main>
+<div class="toast glass" id="toast" role="status"></div>
+<div class="bar glass" id="bar" role="tablist" aria-label="Sections"><i class="lens" aria-hidden="true"></i>
+ <button class="tb" id="k0" role="tab" aria-controls="p0"><svg class="ic" viewBox="0 0 24 24"><path d="M11 4l1.8 4.7L17.5 10.5l-4.7 1.8L11 17l-1.8-4.7L4.5 10.5l4.7-1.8zM19 15v5M16.5 17.5h5"/></svg>Build</button>
+ <button class="tb" id="k1" role="tab" aria-controls="p1"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l7 3v5.5c0 4.4-3 7.6-7 9.5-4-1.9-7-5.1-7-9.5V6z"/></svg>Risk</button>
+ <button class="tb" id="k2" role="tab" aria-controls="p2"><svg class="ic" viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg>Code</button>
+ <button class="tb" id="k3" role="tab" aria-controls="p3"><svg class="ic" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7zM14 3v5h5M10 15l2 2 3.5-4"/></svg>Review</button>
+ <button class="tb" id="k4" role="tab" aria-controls="p4"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 10v1M15 10v1M8.5 14.5q3.5 3 7 0"/></svg>Agent</button></div>
+<div class="scrim" id="sc"></div>
+<div class="sheet glass" id="shS" role="dialog" aria-modal="true" aria-label="Choose signal" aria-hidden="true"><div class="hd"><i></i></div><h2>Entry signal</h2><div class="grp" id="sl"></div><button class="dn" data-x>Done</button></div>
+<div class="sheet glass" id="shR" role="dialog" aria-modal="true" aria-label="AI risk review" aria-hidden="true"><div class="hd"><i></i></div><h2>Risk review</h2><div id="rev" class="card hide"></div><button class="dn" data-x>Done</button></div>
+<div class="sheet glass" id="shM" role="dialog" aria-modal="true" aria-label="Notice" aria-hidden="true"><div class="hd"><i></i></div><h2 id="mh"></h2><p id="mt" style="margin:0"></p><button class="dn" data-x>Done</button></div>
+<div class="sheet glass lime" id="shC" role="dialog" aria-modal="true" aria-label="Chat with your agent" aria-hidden="true"><div class="hd"><i></i></div><h2 id="ch">Talk</h2>
+ <div class="chips" id="qq"><button class="chip" data-q="Explain my strategy settings in plain words.">Explain my strategy</button><button class="chip" data-q="What could go wrong with these settings?">What could go wrong?</button><button class="chip" data-q="How do I install the code I generated on TradingView and on MetaTrader 5?">How do I install this code?</button></div>
+ <div class="log" id="log" role="log" aria-live="polite" aria-label="Conversation"></div>
+ <div class="send"><input class="qi" id="qi" aria-label="Ask your agent" placeholder="Ask about your bot" maxlength="300"><button class="sn" id="qs">Send</button></div>
+ <button class="dn" data-x>Done</button></div>
+<script>
+const $=id=>document.getElementById(id);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const SIG={
+ ma:{n:"EMA crossover",h:"Buys when the fast EMA crosses above the slow EMA, sells on the opposite cross.",L:["Fast EMA length","Slow EMA length"],D:[9,21],T:"ii"},
+ rsi:{n:"RSI reversal",h:"Buys when RSI crosses back up through the oversold level, sells when it crosses down through the overbought level.",L:["RSI length","Oversold level","Overbought level"],D:[14,30,70],T:"iii"},
+ macd:{n:"MACD cross",h:"Buys when the MACD line crosses above its signal line, sells on the opposite cross.",L:["MACD fast length","MACD slow length","MACD signal length"],D:[12,26,9],T:"iii"},
+ bb:{n:"Bollinger Band reversion",h:"Buys when price closes below the lower band, sells when it closes above the upper band.",L:["Band length","Deviation"],D:[20,2],T:"if"},
+ break:{n:"Channel breakout",h:"Buys when price closes above the highest high of the last N bars, sells below the lowest low.",L:["Lookback bars"],D:[20],T:"i"}
+};
+let G={},tab=1,cur=0,so=null,sf=null,t0,ly=0,st0;
+const rm=matchMedia("(prefers-reduced-motion:reduce)");
+const DN=["Both","Long only","Short only"];
+function R(g,l,c,h,tag){const r=el(tag||"div","row"),t=el("div","rl");if(tag==="button")r.type="button";t.append(el("span","rt",l));if(h)t.append(el("span","rh",h));r.append(t);if(c)r.append(typeof c==="string"?el("span","rv",c):c);g.append(r);return r}
+function grp(p,t,f){const w=el("div");if(t)w.append(el("h2","gh",t));const g=el("div","grp");w.append(g);if(f)w.append(el("p","gf",f));p.append(w);return g}
+function num(i,s){const w=el("span","stp"),b=(t,d,a)=>{const x=el("button","sb",t);x.type="button";x.setAttribute("aria-label",a+" "+i.getAttribute("aria-label"));x.onclick=()=>{i.value=+((parseFloat(i.value)||0)+d*s).toFixed(2);i.dispatchEvent(new Event("input"))};return x};i.type="number";i.step="any";i.inputMode="decimal";w.append(b("\u2212",-1,"Decrease"),i,b("+",1,"Increase"));return w}
+function N(g,id,l,v,s,h){const i=el("input");i.id=id;i.value=v;i.setAttribute("aria-label",l);i.oninput=gen;R(g,l,num(i,s),h)}
+function build(){
+ const b=$("b0"),r=$("r0");let g=grp(b,"Strategy");
+ const ni=el("input","ti");ni.id="name";ni.value="My Strategy";ni.type="text";ni.setAttribute("aria-label","Strategy name");ni.oninput=gen;R(g,"Name",ni,"Used on your chart and as the file name.");
+ const sg=el("select","vh"),dr=el("select","vh");sg.id="sig";dr.id="dir";
+ Object.keys(SIG).forEach(k=>{const o=el("option","",SIG[k].n);o.value=k;sg.append(o)});DN.forEach((t,k)=>{const o=el("option","",t);o.value=k;dr.append(o)});
+ [sg,dr].forEach(s=>{s.tabIndex=-1;s.setAttribute("aria-hidden","true")});sg.value="ma";dr.value=0;b.append(sg,dr);
+ const sb=R(g,"Signal",null,null,"button");sb.classList.add("rb");sb.setAttribute("aria-haspopup","dialog");
+ sb.insertAdjacentHTML("beforeend",'<span class="rv" id="sv"></span><svg class="chv" viewBox="0 0 8 14" width="8" height="14" aria-hidden="true"><path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+ sb.onclick=()=>openSheet("shS");
+ Object.keys(SIG).forEach(k=>{const p=el("button","pick",SIG[k].n);p.type="button";p.dataset.k=k;p.setAttribute("role","radio");p.onclick=()=>{sg.value=k;pars(k);gen();closeSheet()};$("sl").append(p)});
+ g=grp(b,"Signal settings"," ");g.id="pars";g.parentNode.lastChild.id="sigh";
+ g=grp(b,"Filters");
+ const dg=R(g,"Direction",null,"Pick Long only or Short only to skip the other side.");dg.classList.add("col");
+ const sgm=el("div","seg");sgm.id="sg";sgm.setAttribute("role","radiogroup");sgm.setAttribute("aria-label","Direction");
+ DN.forEach((t,k)=>{const x=el("button","",t);x.type="button";x.setAttribute("role","radio");x.onclick=()=>{dr.value=k;gen()};sgm.append(x)});dg.append(sgm);
+ N(g,"trend","Trend filter (EMA length)",200,10,"Only trade with this EMA. Enter 0 to turn it off.");
+ const sw=el("input","sw");sw.type="checkbox";sw.id="exit";sw.checked=true;sw.setAttribute("role","switch");sw.onchange=gen;R(g,"Close on opposite signal",sw,"Exit early when the signal flips.","label");
+ g=grp(r,"Per trade","Position size is worked out so a stopped trade loses about this much.");N(g,"risk","Risk per trade (% of equity)",1,.5);
+ g=grp(r,"Stops and targets","Sized from ATR, a measure of recent price movement.");N(g,"atr","ATR length",14,1);N(g,"sl","Stop loss (ATR multiples)",1.5,.5,"1.5 means 1.5 \u00d7 ATR from entry.");N(g,"rr","Take profit (multiple of stop)",2,.5,"2 puts the target twice as far as the stop.");
+ g=grp(r,"Session","Hours are 0 to 23 in chart time (TradingView) or server time (MetaTrader). The same start and end trades around the clock.");N(g,"start","Session start hour",0,1);N(g,"end","Session end hour",0,1);
+ pars("ma");
+}
+function pars(s,v){
+ const S=SIG[s],g=$("pars");g.textContent="";$("sigh").textContent=S.h;
+ S.L.forEach((l,k)=>{const i=el("input");i.value=(v&&v[k]!=null)?v[k]:S.D[k];i.setAttribute("aria-label",l);i.oninput=gen;R(g,l,num(i,S.T[k]==="f"?.5:1))});
+}
+function paint(box,txt){const f=document.createDocumentFragment();txt.replace(/\n$/,"").split("\n").forEach(L=>f.appendChild(el("span","l",L)));box.textContent="";box.appendChild(f)}
+function show(){
+ const c=G.c;agUp();agStats();paint($("code"),G[tab]);
+ $("fn").textContent=(c.name.toLowerCase().replace(/\W+/g,"_").replace(/^_|_$/g,"")||"bot")+(tab===1?".pine":".mq5");
+ [1,2].forEach(k=>{const b=$("t"+k);b.setAttribute("aria-selected",k===tab);b.tabIndex=k===tab?0:-1});
+ $("sv").textContent=SIG[c.sig].n;
+ document.querySelectorAll("#sg button").forEach((b,k)=>b.setAttribute("aria-checked",k===c.dir));
+ document.querySelectorAll(".pick").forEach(p=>p.setAttribute("aria-checked",p.dataset.k===c.sig));
+ const s=$("sum");s.textContent="";
+ [["Signal",SIG[c.sig].n],["Direction",DN[c.dir]],["Risk per trade",c.risk+"%"],["Stop and target",c.sl+" \u00d7 ATR, then "+c.rr+" \u00d7 stop"],["Session",c.start===c.end?"All day":c.start+":00 to "+c.end+":00"]].forEach(x=>R(s,x[0],x[1]));
+ $("how").textContent=tab===1?"TradingView: open the Pine Editor, paste this code, click Add to chart, then open Strategy Tester to see the backtest.":"MetaTrader 5: press F4 for MetaEditor, create a new Expert Advisor, paste this code, press F7 to compile, then attach it to a chart or run it in the Strategy Tester (Ctrl+R).";
+}
+[1,2].forEach(k=>{const b=$("t"+k);b.onclick=()=>{tab=k;show()};b.onkeydown=e=>{if(e.key==="ArrowRight"||e.key==="ArrowLeft"){tab=3-tab;show();$("t"+tab).focus()}}});
+const T=[0,1,2,3,4].map(k=>$("k"+k)),bar=$("bar"),NM=["Build","Risk","Code","Review","Agent"];
+function setTab(n){
+ if(n===cur)return;const o=$("p"+cur),p=$("p"+n);cur=n;
+ T.forEach((b,k)=>{b.setAttribute("aria-selected",k===n);b.tabIndex=k===n?0:-1});
+ bar.style.setProperty("--i",n);bar.classList.add("mv");setTimeout(()=>bar.classList.remove("mv"),170);
+ o.classList.add("out");$("tt").textContent=NM[n];
+ setTimeout(()=>{o.classList.remove("on","out");o.hidden=true;p.hidden=false;p.classList.add("on");p.onanimationend=e=>{if(e.target===p)p.classList.remove("on")};scrollTo(0,0)},rm.matches?0:120);
+}
+T.forEach((b,k)=>{b.onclick=()=>setTab(k);b.onkeydown=e=>{const d=e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0;if(d){const n=(k+d+5)%5;setTab(n);T[n].focus()}}});
+T.forEach((b,k)=>{b.setAttribute("aria-selected",k===0);b.tabIndex=k===0?0:-1});
+let tk=0;
+addEventListener("scroll",()=>{if(tk)return;tk=requestAnimationFrame(()=>{tk=0;const y=scrollY;$("top").classList.toggle("sc",y>24);
+ if(!rm.matches){bar.style.setProperty("--sh",((y/5)%140-20)+"%");
+  if(y-ly>6)bar.classList.add("sm");else if(ly-y>6)bar.classList.remove("sm");
+  clearTimeout(st0);st0=setTimeout(()=>bar.classList.remove("sm"),260)}
+ ly=y})},{passive:true});
+bar.onpointermove=e=>{if(!rm.matches)bar.style.setProperty("--sh",(e.offsetX/bar.offsetWidth*100)+"%")};
+
+/* ---- Agent buddy ---- */
+const SHP={round:[1,1],tall:[.88,1.16],wide:[1.16,.9],squishy:[1.22,.8]};
+const PAL=[["#FFB5C8","Pink"],["#FFC9A8","Peach"],["#FFE29A","Butter"],["#D4EE9F","Lime"],["#A8EBC4","Mint"],["#9FE3E8","Aqua"],["#A9D4FF","Sky"],["#B9B8FF","Periwinkle"],["#D9B8FF","Lilac"],["#F4B8F0","Orchid"],["#E8DCCB","Sand"],["#CFD8E3","Mist"]];
+const ROLES={scout:["Strategy Scout","explaining the user's strategy settings in plain words"],guard:["Risk Guard","spotting risk and warning the user about it"],buddy:["Code Buddy","explaining the generated code and how to use it"]};
+const VOICES={friendly:["Friendly","warm, upbeat and encouraging"],calm:["Calm","calm, steady and reassuring"],hype:["Hype","energetic and excited, with playful emphasis"]};
+const LINES={friendly:["Hi! I'm here if you need me.","Ready when you are!","Change a setting and I'll react."],calm:["Slow and steady.","Take your time with the rules.","Test first, then decide."],hype:["Let's gooo!","Ooh, strategy time!","Backtest it, champ!"]};
+const DEF=()=>({skin:0,color:"#FFB5C8",shape:"round",eyes:"round",es:1,ec:"#2B2D55",mouth:"smile",cheek:true,bl:"#FF8FA8",acc:{antenna:false,bow:false,hat:false,phones:false},pat:"none",mg:"#FFD9EC",name:"Buddy",role:"scout",voice:"friendly"});
+let A=DEF(),TH=false,lm="",saved=false,ready=false,UI=[],bt,UID=0;
+const NK=["bc","bd","bh","ec","bl","mg","dk","ak","ad"],pk=a=>a[Math.floor(Math.random()*a.length)],nm=()=>(A.name||"").trim()||"Buddy";
+function hsl(x){const r=parseInt(x.slice(1,3),16)/255,g=parseInt(x.slice(3,5),16)/255,b=parseInt(x.slice(5,7),16)/255,M=Math.max(r,g,b),m=Math.min(r,g,b),l=(M+m)/2,d=M-m;let h=0,s=0;if(d){s=d/(1-Math.abs(2*l-1));h=M===r?((g-b)/d)%6:M===g?(b-r)/d+2:(r-g)/d+4;h=Math.round((h*60+360)%360)}return[h,Math.round(s*100),Math.round(l*100)]}
+function K(a){const[h,s,l]=hsl(a.color),o=(h+150)%360;return{bc:a.color,bd:`hsl(${h} ${Math.min(90,s+8)}% ${Math.max(20,l-18)}%)`,bh:`hsl(${h} ${s}% ${Math.min(97,l+14)}%)`,ec:a.ec,bl:a.bl,mg:a.mg,dk:`hsl(${h} 35% 24%)`,ak:`hsl(${o} 75% 80%)`,ad:`hsl(${o} 55% 62%)`}}
+const SK=[
+{n:"Blobby",t:46,d:"M32 172C22 110 46 46 100 46S178 110 168 172C140 182 60 182 32 172Z",b:()=>"",x:()=>""},
+{n:"Boxy",t:48,d:"M54 48H146A24 24 0 0 1 170 72V150A24 24 0 0 1 146 174H54A24 24 0 0 1 30 150V72A24 24 0 0 1 54 48Z",
+ b:f=>`<rect ${f("bd")} x="18" y="92" width="20" height="36" rx="10"/><rect ${f("bd")} x="162" y="92" width="20" height="36" rx="10"/><rect ${f("bd")} x="58" y="164" width="30" height="18" rx="9"/><rect ${f("bd")} x="112" y="164" width="30" height="18" rx="9"/>`,
+ x:f=>`<rect ${f("bh")} opacity=".6" x="44" y="72" width="112" height="82" rx="32"/>`},
+{n:"Pip",t:40,y:10,d:"M100 40C150 40 176 86 170 130C165 164 135 176 100 176C65 176 35 164 30 130C24 86 50 40 100 40Z",
+ b:f=>`<ellipse ${f("bd")} cx="24" cy="132" rx="14" ry="24" transform="rotate(14 24 132)"/><ellipse ${f("bd")} cx="176" cy="132" rx="14" ry="24" transform="rotate(-14 176 132)"/><ellipse fill="#FFB35C" cx="76" cy="178" rx="15" ry="7"/><ellipse fill="#FFB35C" cx="124" cy="178" rx="15" ry="7"/><circle ${f("bd")} cx="90" cy="38" r="9"/><circle ${f("bd")} cx="110" cy="36" r="10"/><circle ${f("bd")} cx="100" cy="30" r="8"/>`,
+ x:()=>`<path fill="#FFB35C" d="M91 110H109L100 124Z"/>`},
+{n:"Bunbun",t:62,d:"M100 62C150 62 172 104 166 140C162 166 134 176 100 176C66 176 38 166 34 140C28 104 50 62 100 62Z",
+ b:f=>`<g transform="rotate(-10 70 70)"><ellipse ${f("bc")} cx="70" cy="40" rx="17" ry="36"/><ellipse fill="#FFC1D6" opacity=".85" cx="70" cy="42" rx="8" ry="24"/></g><g transform="rotate(10 130 70)"><ellipse ${f("bc")} cx="130" cy="40" rx="17" ry="36"/><ellipse fill="#FFC1D6" opacity=".85" cx="130" cy="42" rx="8" ry="24"/></g><ellipse ${f("bd")} cx="66" cy="177" rx="18" ry="9"/><ellipse ${f("bd")} cx="134" cy="177" rx="18" ry="9"/>`,x:()=>""},
+{n:"Bearo",t:54,d:"M100 54C152 54 174 100 168 138C164 166 134 176 100 176C66 176 36 166 32 138C26 100 48 54 100 54Z",
+ b:f=>`<circle ${f("bc")} cx="54" cy="66" r="22"/><circle ${f("bd")} cx="54" cy="66" r="11"/><circle ${f("bc")} cx="146" cy="66" r="22"/><circle ${f("bd")} cx="146" cy="66" r="11"/><ellipse ${f("bd")} cx="64" cy="177" rx="18" ry="9"/><ellipse ${f("bd")} cx="136" cy="177" rx="18" ry="9"/>`,
+ x:f=>`<ellipse ${f("bh")} opacity=".85" cx="100" cy="128" rx="30" ry="22"/>`},
+{n:"Orbit",t:38,d:"M100 38C160 38 180 90 164 132C154 160 128 176 100 176C72 176 46 160 36 132C20 90 40 38 100 38Z",
+ b:(f,s)=>`<path ${s("bd")} d="M72 50Q62 28 58 20M128 50Q138 28 142 20" fill="none" stroke-width="6" stroke-linecap="round"/><circle ${f("ak")} cx="58" cy="18" r="9"/><circle ${f("ak")} cx="142" cy="18" r="9"/><ellipse ${f("bd")} cx="24" cy="116" rx="12" ry="20" transform="rotate(16 24 116)"/><ellipse ${f("bd")} cx="176" cy="116" rx="12" ry="20" transform="rotate(-16 176 116)"/><ellipse ${f("bd")} cx="72" cy="178" rx="16" ry="8"/><ellipse ${f("bd")} cx="128" cy="178" rx="16" ry="8"/>`,x:()=>""}];
+function fig(a,m,L,ng){
+ const k=K(a),sk=SK[a.skin],t=sk.t,y=124+(sk.y||0),id="c"+(++UID),es=a.es,r=13*es,ey=100,X=[72,128];
+ const f=n=>L?`style="fill:var(--a-${n})"`:`fill="${k[n]}"`,s=n=>L?`style="stroke:var(--a-${n})"`:`stroke="${k[n]}"`;
+ const st=(x,v,q)=>`M${x} ${v-q}Q${x} ${v} ${x+q} ${v}Q${x} ${v} ${x} ${v+q}Q${x} ${v} ${x-q} ${v}Q${x} ${v} ${x} ${v-q}Z`;
+ const sp=(x,v)=>`<circle fill="#fff" cx="${x+4*es}" cy="${v-5*es}" r="${4.6*es}"/><circle fill="#fff" opacity=".85" cx="${x-4*es}" cy="${v+5*es}" r="${2*es}"/>`;
+ const sty=m==="worry"||m==="think"?"round":a.eyes;let E="";
+ if(sty==="round")E=X.map(x=>`<circle ${f("ec")} cx="${x}" cy="${ey}" r="${r}"/>${sp(x,ey)}`).join("");
+ else if(sty==="sleepy")E=X.map(x=>`<path ${f("ec")} d="M${x-r} ${ey}A${r} ${r} 0 0 0 ${x+r} ${ey}Z"/><path ${s("dk")} d="M${x-r-3} ${ey}H${x+r+3}" stroke-width="5" stroke-linecap="round"/><circle fill="#fff" cx="${x+3*es}" cy="${ey+5*es}" r="${2.6*es}"/>`).join("");
+ else if(sty==="happy")E=X.map(x=>`<path ${s("ec")} d="M${x-r} ${ey+5}Q${x} ${ey-r-4} ${x+r} ${ey+5}" fill="none" stroke-width="6" stroke-linecap="round"/>`).join("");
+ else if(sty==="visor")E=`<rect ${f("dk")} x="50" y="${ey-15}" width="100" height="30" rx="15"/>`+X.map(x=>`<circle ${f("ec")} cx="${x+(x<100?4:-4)}" cy="${ey}" r="${9*es}"/><circle fill="#fff" cx="${x+(x<100?7:-1)}" cy="${ey-4*es}" r="${3*es}"/>`).join("");
+ else E=`<circle ${f("ec")} cx="100" cy="${ey}" r="${22*es}"/>${sp(100,ey)}`;
+ if(m==="worry")E+=`<path ${s("dk")} d="M56 84L84 76M116 76L144 84" fill="none" stroke-width="5" stroke-linecap="round"/>`;
+ E=`<g class="eyes" ${m==="think"?'transform="translate(0 -4)"':""}>${E}</g>`;
+ const ms=`fill="none" stroke-width="5" stroke-linecap="round"`;let M="";
+ if(m==="worry")M=`<path ${s("dk")} d="M88 ${y+8}Q100 ${y-4} 112 ${y+8}" ${ms}/>`;
+ else if(m==="think"||a.mouth==="o")M=`<ellipse ${f("dk")} cx="100" cy="${y+4}" rx="5" ry="6.5"/>`;
+ else if(a.mouth==="smile")M=`<path ${s("dk")} d="M88 ${y}Q100 ${y+12} 112 ${y}" ${ms}/>`;
+ else if(a.mouth==="open")M=`<path ${f("dk")} d="M86 ${y-2}Q100 ${y+22} 114 ${y-2}Z"/><ellipse fill="#FF9DB2" cx="100" cy="${y+10}" rx="7" ry="4"/>`;
+ else if(a.mouth==="cat")M=`<path ${s("dk")} d="M84 ${y}Q92 ${y+10} 100 ${y}Q108 ${y+10} 116 ${y}" ${ms}/>`;
+ const C=a.cheek?[56,144].map(x=>`<ellipse ${f("bl")} opacity=".75" cx="${x}" cy="${y-2}" rx="12" ry="8"/>`).join(""):"";
+ let P="";
+ if(a.pat==="sparkles")P=[[46,128,7],[154,124,6],[100,158,5],[62,72,6],[142,76,7]].map(p=>`<path fill="#fff" opacity=".8" d="${st(p[0],p[1],p[2])}"/>`).join("");
+ if(a.pat==="spots")P=[[50,94,7],[150,92,8],[76,156,10],[132,152,7],[100,170,6]].map(p=>`<circle ${f("bd")} opacity=".28" cx="${p[0]}" cy="${p[1]}" r="${p[2]}"/>`).join("");
+ let X2="";const c=a.acc;
+ if(c.phones)X2+=`<path ${s("ad")} d="M40 106Q40 ${t-8} 100 ${t-8}Q160 ${t-8} 160 106" fill="none" stroke-width="9" stroke-linecap="round"/><rect ${f("ak")} x="30" y="94" width="20" height="38" rx="10"/><rect ${f("ak")} x="150" y="94" width="20" height="38" rx="10"/>`;
+ if(c.antenna)X2+=`<path ${s("bd")} d="M100 ${t+2}V${t-20}" stroke-width="5" stroke-linecap="round"/><circle ${f("ak")} cx="100" cy="${t-26}" r="9"/>`;
+ if(c.hat)X2+=`<path ${f("ak")} d="M68 ${t+10}Q100 ${t-34} 132 ${t+10}Z"/><rect ${f("ad")} x="60" y="${t+4}" width="80" height="12" rx="6"/><circle fill="#fff" cx="100" cy="${t-24}" r="7"/>`;
+ if(c.bow)X2+=`<path ${f("ak")} d="M100 162L76 148V176ZM100 162L124 148V176Z"/><circle ${f("ad")} cx="100" cy="162" r="7"/>`;
+ if(m==="worry")X2+=`<path fill="#8FD3FF" d="M152 56Q162 72 152 80Q142 72 152 56Z"/><ellipse fill="#fff" opacity=".7" cx="149" cy="73" rx="2" ry="3"/>`;
+ if(m==="happy")X2+=`<path fill="#FFD86B" d="${st(152,60,10)}"/>`;
+ const sc=L?'style="stop-color:var(--a-mg)"':`stop-color="${k.mg}"`;
+ const g=ng?"":`<defs><radialGradient id="g${id}"><stop offset="0" ${sc} stop-opacity=".85"/><stop offset="1" ${sc} stop-opacity="0"/></radialGradient></defs><circle cx="100" cy="108" r="98" fill="url(#g${id})"/>`;
+ const p=sk.b(f,s)+`<path ${f("bc")} d="${sk.d}"/><clipPath id="${id}"><path d="${sk.d}"/></clipPath><g clip-path="url(#${id})"><ellipse ${f("bd")} opacity=".25" cx="100" cy="196" rx="96" ry="38"/>${P}</g>`+sk.x(f,s)+`<ellipse fill="#fff" opacity=".42" cx="68" cy="${t+30}" rx="22" ry="11" transform="rotate(-28 68 ${t+30})"/><circle fill="#fff" opacity=".5" cx="48" cy="${t+54}" r="4"/>${C}${E}${M}${X2}`;
+ return{g,p};
+}
+function stat(a,m,sz,ng){const q=fig(a,m,false,ng),S=SHP[a.shape];return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="${sz}" height="${sz}">${q.g}<ellipse cx="100" cy="182" rx="64" ry="8" fill="#000" opacity=".1"/><g transform="translate(100 178) scale(${S[0]} ${S[1]}) translate(-100 -178)">${q.p}</g></svg>`}
+function mood(){const c=G.c;if(TH)return"think";if(!c)return"ok";if(c.risk>2||c.sl<=0)return"worry";return c.risk<=1?"happy":"ok"}
+function agRender(){
+ const m=mood(),q=fig(A,m,true),k=K(A),S=SHP[A.shape],av=$("av");lm=m;
+ NK.forEach(n=>av.style.setProperty("--a-"+n,k[n]));
+ $("gl").innerHTML=q.g;$("sh").innerHTML=q.p;$("sh").style.transform=`scale(${S[0]},${S[1]})`;
+ $("tk").textContent="Chat with "+nm();$("ch").textContent="Talk to "+nm();$("agn").textContent=nm();$("pl").textContent=ROLES[A.role][0];
+ $("avb").setAttribute("aria-label","Tap "+nm()+" to say hi");$("tm").innerHTML=saved?stat(A,"ok",32,true):"";
+}
+function agUp(){const m=mood();if(m===lm)return;agRender();if(!ready||TH)return;if(m==="worry")bubSay("Careful: that risk looks high.");else if(m==="happy")bubSay("Nice, that's a gentle risk level.")}
+function bubSay(t,keep){const b=$("bub");b.hidden=false;b.textContent=t;clearTimeout(bt);if(!keep)bt=setTimeout(()=>{b.hidden=true},4500)}
+function upd(){agRender();UI.forEach(f=>f())}
+function chips(g,title,items,on,set,multi){
+ const r=R(g,title);r.classList.add("col");const c=el("div","chips");c.setAttribute("role",multi?"group":"radiogroup");c.setAttribute("aria-label",title);
+ items.forEach(it=>{const b=el("button","chip",it[1]);b.type="button";b.setAttribute("role",multi?"checkbox":"radio");b.onclick=()=>{set(it[0]);upd()};c.append(b)});
+ r.append(c);UI.push(()=>[...c.children].forEach((b,i)=>b.setAttribute("aria-checked",!!on(items[i][0]))));
+}
+function CI(g,title,get,set){const i=el("input","ci");i.type="color";i.setAttribute("aria-label",title);i.oninput=()=>{set(i.value);upd()};R(g,title,i);UI.push(()=>{i.value=get()})}
+function agBuild(){
+ const a0=$("a0");let g=grp(a0,"Skin"),r=el("div","row");
+ const car=el("div","chips");car.setAttribute("role","radiogroup");car.setAttribute("aria-label","Skin");
+ SK.forEach((s,i)=>{const b=el("button","sk");b.type="button";b.setAttribute("role","radio");b.append(el("span","sv"),el("span","",s.n));b.onclick=()=>{A.skin=i;upd()};car.append(b)});
+ r.append(car);g.append(r);
+ UI.push(()=>[...car.children].forEach((b,i)=>{b.setAttribute("aria-checked",A.skin===i);b.firstChild.innerHTML=stat({...A,skin:i,acc:{},pat:"none"},"ok",56,true)}));
+ g=grp(a0,"Color","Ears, feet and details get a darker shade automatically.");r=el("div","row");
+ const cc=el("div","chips wrap");cc.setAttribute("role","radiogroup");cc.setAttribute("aria-label","Body color");
+ PAL.forEach(p=>{const b=el("button","swt");b.type="button";b.setAttribute("role","radio");b.setAttribute("aria-label",p[1]);b.style.setProperty("--c",p[0]);b.append(el("i"));b.onclick=()=>{A.color=p[0];upd()};cc.append(b)});
+ const ci=el("input","ci");ci.type="color";ci.setAttribute("aria-label","Custom color");ci.oninput=()=>{A.color=ci.value;upd()};cc.append(ci);r.append(cc);g.append(r);
+ UI.push(()=>{[...cc.querySelectorAll(".swt")].forEach((b,i)=>b.setAttribute("aria-checked",PAL[i][0].toLowerCase()===A.color.toLowerCase()));ci.value=A.color});
+ g=grp(a0,"Shape");chips(g,"Body shape",[["round","Round"],["tall","Tall"],["wide","Wide"],["squishy","Squishy"]],k=>A.shape===k,k=>A.shape=k);
+ g=grp(a0,"Eyes");chips(g,"Eye style",[["round","Round sparkle"],["sleepy","Sleepy"],["happy","Happy arcs"],["visor","Visor glow"],["single","Single big eye"]],k=>A.eyes===k,k=>A.eyes=k);
+ const rg=el("input","rng");rg.type="range";rg.min=.7;rg.max=1.4;rg.step=.05;rg.setAttribute("aria-label","Eye size");rg.oninput=()=>{A.es=+rg.value;upd()};R(g,"Eye size",rg);UI.push(()=>{rg.value=A.es});
+ CI(g,"Eye color",()=>A.ec,v=>A.ec=v);
+ g=grp(a0,"Mouth");chips(g,"Mouth style",[["smile","Smile"],["open","Open smile"],["o","Tiny o"],["cat","Cat mouth"],["none","None"]],k=>A.mouth===k,k=>A.mouth=k);
+ g=grp(a0,"Cheeks");const sw=el("input","sw");sw.type="checkbox";sw.setAttribute("role","switch");sw.onchange=()=>{A.cheek=sw.checked;upd()};R(g,"Blush",sw,"Rosy cheeks on or off.","label");UI.push(()=>{sw.checked=A.cheek});CI(g,"Blush color",()=>A.bl,v=>A.bl=v);
+ g=grp(a0,"Accessories","Pick one of each type, or none.");
+ chips(g,"Accessories",[["antenna","Antenna"],["bow","Bow tie"],["hat","Little hat"],["phones","Headphones"],["none","None"]],k=>k==="none"?!Object.values(A.acc).some(Boolean):A.acc[k],k=>{if(k==="none")Object.keys(A.acc).forEach(x=>A.acc[x]=false);else A.acc[k]=!A.acc[k]},true);
+ g=grp(a0,"Extras");chips(g,"Body pattern",[["none","None"],["sparkles","Sparkles"],["spots","Soft spots"]],k=>A.pat===k,k=>A.pat=k);CI(g,"Mood glow color",()=>A.mg,v=>A.mg=v);
+ g=grp(a0,"Identity");const ni=el("input","ti");ni.type="text";ni.maxLength=16;ni.setAttribute("aria-label","Agent name");ni.oninput=()=>{A.name=ni.value;agRender()};R(g,"Name",ni);UI.push(()=>{ni.value=A.name});
+ chips(g,"Role",Object.keys(ROLES).map(k=>[k,ROLES[k][0]]),k=>A.role===k,k=>A.role=k);chips(g,"Voice",Object.keys(VOICES).map(k=>[k,VOICES[k][0]]),k=>A.voice===k,k=>A.voice=k);
+ const br=el("div","br"),mk=(t,c,fn)=>{const b=el("button",c,t);b.type="button";b.onclick=fn;br.append(b)};
+ mk("Randomize","",rnd);mk("Reset","",()=>{A=DEF();upd()});mk("Save agent","pb",save);a0.append(br);
+ g=grp(a0,"Export");const d=R(g,"Download avatar",null,"Saves your character as an SVG file.","button");d.classList.add("rb");
+ d.insertAdjacentHTML("beforeend",'<svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 4v11M7.5 11l4.5 4.5 4.5-4.5M5 20h14"/></svg>');d.onclick=dlAvatar;
+}
+function rnd(){A.skin=Math.floor(Math.random()*6);A.color=pk(PAL)[0];A.shape=pk(Object.keys(SHP));A.eyes=pk(["round","sleepy","happy","visor","single"]);A.es=+(.85+Math.random()*.4).toFixed(2);A.ec=pk(["#2B2D55","#4A3B7C","#1F5F6B","#6B3A4A","#3B4A7C"]);A.mouth=pk(["smile","open","o","cat"]);A.cheek=Math.random()>.2;A.bl=pk(["#FF8FA8","#FFA27A","#E58FFF"]);["antenna","bow","hat","phones"].forEach(k=>A.acc[k]=Math.random()<.3);A.pat=pk(["none","sparkles","spots"]);A.mg=pk(PAL)[0];upd();bubSay(pk(LINES[A.voice]))}
+function save(){try{localStorage.setItem("botsmith.agent",JSON.stringify(A));saved=true;agRender();toast("Agent saved")}catch(e){sayC("This browser blocked saving, so "+nm()+" won't be here next time. You can still download the avatar.")}}
+async function dlAvatar(){
+ const d=await cu("downloads");if(!d){sayC("Downloads are not available here. Use Save agent to keep your buddy in this browser.");return}
+ const fn=(nm().toLowerCase().replace(/\W+/g,"_").replace(/^_|_$/g,"")||"agent")+".svg";
+ try{await d.save({filename:fn,data:stat(A,"ok",512)});sayC("Saved "+fn+".")}catch(e){sayC("Download was cancelled.")}
+}
+const cu=n=>typeof claude==="undefined"?Promise.resolve(null):claude.use(n).catch(()=>null);
+function addMsg(r,t){const m=el("div","msg "+r,t);$("log").append(m);$("log").scrollTop=1e9;return m}
+async function ask(q){
+ q=q.trim();if(!q||TH)return;addMsg("you",q);$("qi").value="";TH=true;agUp();
+ const b=$("bub");clearTimeout(bt);b.hidden=false;b.innerHTML='<span class="dots" aria-label="Thinking"><i></i><i></i><i></i></span>';
+ const m=addMsg("bot","\u2026"),S=await cu("sample");
+ if(!S){TH=false;agUp();m.textContent="I can't reach Claude from here, so I can't chat yet. My look and settings still work. Try again where Claude is available.";bubSay(m.textContent,1);return}
+ const c=G.c,p=`You are ${nm()}, a cute AI buddy inside a trading bot code generator, in the role "${ROLES[A.role][0]}", focused on ${ROLES[A.role][1]}. Speak in a ${VOICES[A.voice][1]} voice. Answer in under 80 words. Never promise profits and never give financial advice. Strategy settings: ${JSON.stringify(c)}. Signal meaning: ${SIG[c.sig].h} Risk per trade is ${c.risk}%. Current code (${tab===1?"TradingView Pine Script":"MetaTrader 5 MQL5"}, may be cut off):\n${G[tab].slice(0,2500)}\nQuestion: ${q}`;
+ try{const r=await S(p,{onText:({text})=>{m.textContent=text}});m.textContent=r.text}
+ catch(e){m.textContent="Hmm, I couldn't get an answer just now. Please try again in a moment."}
+ TH=false;agUp();bubSay(m.textContent,1);
+}
+function agInit(){
+ NK.forEach(n=>{try{CSS.registerProperty({name:"--a-"+n,syntax:"<color>",inherits:true,initialValue:"#fff"})}catch(e){}});
+ $("av").style.transition=NK.map(n=>"--a-"+n+" .25s ease-out").join();
+ try{const s=JSON.parse(localStorage.getItem("botsmith.agent"));if(s&&typeof s==="object"&&SK[s.skin]){A=Object.assign(DEF(),s,{acc:Object.assign(DEF().acc,s.acc||{})});if(!SHP[A.shape])A.shape="round";if(!/^#[0-9a-f]{6}$/i.test(A.color))A.color="#FFB5C8";saved=true}}catch(e){}
+ agBuild();upd();agWire();
+ $("avb").onclick=()=>{const ab=$("ab");ab.classList.remove("wig");ab.getBoundingClientRect();ab.classList.add("wig");setTimeout(()=>ab.classList.remove("wig"),650);bubSay(pk(LINES[A.voice]))};
+ $("tk2").onclick=()=>openSheet("shC");$("bub").onclick=()=>openSheet("shC");
+ document.querySelectorAll("#qq .chip").forEach(b=>b.onclick=()=>ask(b.dataset.q));
+ $("qs").onclick=()=>ask($("qi").value);$("qi").onkeydown=e=>{if(e.key==="Enter")ask($("qi").value)};
+}
+
+/* ---- Agent hub: Manage bot ---- */
+let HI=[],UNDO=null,busy=false,hAll=false;
+const LB={name:"Name",dir:"Direction",sig:"Signal",p:"Signal settings",trend:"Trend EMA",atr:"ATR length",sl:"Stop loss (\u00d7 ATR)",rr:"Take profit (\u00d7 stop)",risk:"Risk per trade (%)",start:"Session start",end:"Session end",exitOpp:"Close on opposite signal"};
+const fv=(k,v)=>k==="dir"?DN[v]:k==="sig"?SIG[v].n:k==="p"?v.join(", "):k==="exitOpp"?(v?"On":"Off"):v;
+const diff=(a,b)=>Object.keys(LB).filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k])).map(k=>LB[k]+": "+fv(k,a[k])+" \u2192 "+fv(k,b[k]));
+function applySet(r){
+ const cs=$("sig").value;
+ if(r.sig&&SIG[r.sig]){$("sig").value=r.sig;pars(r.sig,Array.isArray(r.p)?r.p:null)}else if(Array.isArray(r.p))pars(cs,r.p);
+ const set=(id,v)=>{if(v!=null&&!isNaN(v))$(id).value=v};
+ if(r.name)$("name").value=String(r.name).slice(0,40);
+ if(r.dir!=null&&[0,1,2].includes(+r.dir))$("dir").value=r.dir;
+ set("trend",r.trend);set("atr",r.atr);set("sl",r.sl);set("rr",r.rr);set("risk",r.risk);set("start",r.start);set("end",r.end);
+ if(typeof r.exitOpp==="boolean")$("exit").checked=r.exitOpp;
+ gen();
+}
+function agView(n){["v0","v1","v2"].forEach((id,k)=>{const v=$(id);v.classList.remove("va");v.hidden=k!==n;if(k===n){v.getBoundingClientRect();v.classList.add("va")}});scrollTo(0,0)}
+function agStats(){
+ const c=G.c,s=$("stats");if(!c||!s)return;s.textContent="";
+ const rk=c.risk<=1?["Gentle",""]:c.risk<=2?["Moderate","w"]:["High","h"];
+ [["Entry signal",SIG[c.sig].n,DN[c.dir],""],["Risk per trade",c.risk+"%",rk[0],rk[1]],["Stop loss",c.sl+"\u00d7 ATR","Target "+c.rr+"\u00d7 stop",""],["Session",c.start===c.end?"All day":c.start+"\u2013"+c.end+"h",c.exitOpp?"Exits on flip":"Holds to stop or target",""]].forEach(x=>{
+  const d=el("div","stat "+x[3]);d.append(el("small","",x[0]),el("b","",x[1]),el("i","",x[2]));s.append(d)});
+}
+function agHist(){
+ [["hist",hAll?20:3],["hist2",8]].forEach(a=>{const c=$(a[0]);c.textContent="";HI.slice(0,a[1]).forEach(h=>{
+  const b=el("button","hr");b.type="button";b.setAttribute("aria-label","Reuse instruction: "+h.t);
+  b.append(el("span","hi "+(h.s==="Applied"?"":h.s==="Failed"?"bad":"mid"),h.s==="Applied"?"\u2713":h.s==="Failed"?"!":"\u2013"),el("span","ht",h.t),el("span","hs",h.s));
+  b.onclick=()=>{agView(2);$("ins").value=h.t;$("ins").focus()};c.append(b)})});
+ $("hAll").hidden=HI.length<=3;$("hAll").textContent=hAll?"Show less":"See all";
+}
+function addHist(t,s){HI.unshift({t:t.slice(0,120),s});HI.length=Math.min(HI.length,20);try{localStorage.setItem("botsmith.history",JSON.stringify(HI))}catch(e){}agHist()}
+async function instruct(q){
+ q=(q||"").trim();const st=$("ist");
+ if(!q){st.textContent="Type an instruction first, for example: lower my risk to 0.5%.";return}
+ if(busy)return;busy=true;TH=true;agUp();$("insgo").disabled=true;st.textContent=nm()+" is working on it\u2026";
+ const fin=(s,m)=>{TH=false;busy=false;$("insgo").disabled=false;st.textContent=m;addHist(q,s);agUp();bubSay(m,1)};
+ const S=await cu("sample");
+ if(!S){fin("Failed","I can't reach Claude from here, so I can't act on instructions. You can still edit settings by hand in the Build and Risk tabs.");return}
+ try{
+  const before=G.c,r=await S.json('You adjust a trading bot\'s settings from a plain-English instruction. Current settings: '+JSON.stringify(before)+'. Signals: ma, rsi, macd, bb, break (p by signal: ma [fast,slow]; rsi [length,oversold,overbought]; macd [fast,slow,signal]; bb [length,deviation]; break [lookback]). dir: 0 both, 1 long only, 2 short only. start 0-23, end 0-24 (same start and end means all day). Return ONLY JSON: {"changes":{only the fields to change, same keys and value types as the current settings},"note":string,"warning":string|null}. If the instruction does not ask for a change, return {"changes":{}} and answer in note. note: under 25 words, in a '+VOICES[A.voice][1]+' voice as '+nm()+', never promising profits. warning: a short caution when the new settings are riskier (for example risk per trade above 2%), otherwise null. Instruction: '+q);
+  if(!r||typeof r.changes!=="object"||r.changes===null)throw 0;
+  applySet(r.changes);const d=diff(before,G.c);
+  $("chg").hidden=!d.length;$("cl").textContent="";d.forEach(x=>$("cl").append(el("li","",x)));
+  UNDO=d.length?before:null;if(d.length)toast("Settings updated");
+  fin(d.length?"Applied":"No change",(String(r.note||(d.length?"Done.":"Nothing to change.")).slice(0,300))+(r.warning?" "+String(r.warning).slice(0,200):""));
+ }catch(e){fin("Failed","I couldn't turn that into settings. Try something specific, like \"risk 0.5% and trade 7 to 16\".")}
+}
+function agWire(){
+ try{const h=JSON.parse(localStorage.getItem("botsmith.history"));if(Array.isArray(h))HI=h.filter(x=>x&&typeof x.t==="string").slice(0,20)}catch(e){}
+ agHist();
+ $("tMan").onclick=()=>agView(2);$("tCre").onclick=()=>agView(1);
+ document.querySelectorAll(".back").forEach(b=>b.onclick=()=>agView(0));
+ $("hAll").onclick=()=>{hAll=!hAll;agHist()};
+ $("insgo").onclick=()=>{const v=$("ins").value;instruct(v);if(v.trim())$("ins").value=""};
+ document.querySelectorAll("#iq .chip").forEach(b=>b.onclick=()=>instruct(b.dataset.q));
+ $("undo").onclick=()=>{if(!UNDO)return;applySet(UNDO);UNDO=null;$("chg").hidden=true;$("ist").textContent="Reverted to your previous settings.";toast("Reverted")};
+ $("gCode").onclick=()=>setTab(2);$("gRev").onclick=()=>setTab(3);
+}
+function openSheet(id){closeSheet(1);so=$(id);sf=document.activeElement;$("sc").classList.add("on");so.classList.add("open");so.setAttribute("aria-hidden","false");setTimeout(()=>(so.querySelector("button")||so).focus(),60)}
+function closeSheet(q){if(!so)return;so.classList.remove("open");so.style.transform="";so.setAttribute("aria-hidden","true");$("sc").classList.remove("on");if(!q&&sf)sf.focus();so=null}
+$("sc").onclick=()=>closeSheet();document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>closeSheet());
+addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
+document.querySelectorAll(".hd").forEach(h=>{let y0=null;
+ h.onpointerdown=e=>{y0=e.clientY;h.setPointerCapture(e.pointerId);so.style.transition="none"};
+ h.onpointermove=e=>{if(y0==null)return;const d=Math.max(0,e.clientY-y0);so.style.transform="translateY("+d+"px)";if(!rm.matches)so.style.setProperty("--sh",(30+d/4)+"%")};
+ h.onpointerup=h.onpointercancel=e=>{if(y0==null)return;const d=e.clientY-y0;y0=null;so.style.transition="";if(d>90)closeSheet();else so.style.transform=""}});
+function toast(t){const o=$("toast");o.textContent=t;o.classList.add("on");clearTimeout(t0);t0=setTimeout(()=>o.classList.remove("on"),1800)}
+function sayC(t){if(/^Copied/.test(t)){toast("Copied");return}$("mh").textContent=/^Saved/.test(t)?"Saved":"Heads up";$("mt").textContent=t;openSheet("shM")}
+function get(){
+  const n=(id,lo,hi,d)=>{let v=parseFloat($(id).value);if(isNaN(v))v=d;return Math.min(hi,Math.max(lo,v))};
+  const sig=$("sig").value,S=SIG[sig];
+  return{name:($("name").value||"My Strategy").replace(/[^\w \-]/g,"").slice(0,40)||"My Strategy",dir:+$("dir").value,sig,
+    p:[...document.querySelectorAll("#pars input")].map((i,k)=>{let v=parseFloat(i.value);if(isNaN(v)||v<=0)v=S.D[k];return S.T[k]==="f"?v:Math.round(v)}),
+    trend:Math.round(n("trend",0,1000,200)),atr:Math.round(n("atr",1,100,14)),sl:n("sl",.1,20,1.5),rr:n("rr",.2,20,2),risk:n("risk",.1,10,1),
+    start:Math.round(n("start",0,23,0)),end:Math.round(n("end",0,24,0)),exitOpp:$("exit").checked};
+}
+function pine(c){
+  const S=SIG[c.sig],I=S.L.map((l,i)=>"p"+(i+1)+" = input."+(S.T[i]==="f"?"float("+c.p[i]+', "'+l+'", minval=0.1, step=0.1)':"int("+c.p[i]+', "'+l+'", minval=1)')).join("\n");
+  const B={
+   ma:'fastMA = ta.ema(close, p1)\nslowMA = ta.ema(close, p2)\nlongSig = ta.crossover(fastMA, slowMA)\nshortSig = ta.crossunder(fastMA, slowMA)\nplot(fastMA, "Fast EMA", color.teal)\nplot(slowMA, "Slow EMA", color.orange)',
+   rsi:'rsiV = ta.rsi(close, p1)\nlongSig = ta.crossover(rsiV, p2)\nshortSig = ta.crossunder(rsiV, p3)',
+   macd:'[macdL, macdS, macdH] = ta.macd(close, p1, p2, p3)\nlongSig = ta.crossover(macdL, macdS)\nshortSig = ta.crossunder(macdL, macdS)',
+   bb:'[bbMid, bbUp, bbLo] = ta.bb(close, p1, p2)\nlongSig = close < bbLo\nshortSig = close > bbUp\nplot(bbUp, "Upper band", color.gray)\nplot(bbLo, "Lower band", color.gray)',
+   break:'hiN = ta.highest(high, p1)[1]\nloN = ta.lowest(low, p1)[1]\nlongSig = close > hiN\nshortSig = close < loN'};
+  return `//@version=6
+// ${c.name} - generated by Botsmith
+strategy("${c.name}", overlay=true, initial_capital=10000, default_qty_type=strategy.fixed, pyramiding=0, commission_type=strategy.commission.percent, commission_value=0.02, slippage=2)
+
+dirMode = input.string("${["Both","Long only","Short only"][c.dir]}", "Direction", options=["Both", "Long only", "Short only"])
+riskPct = input.float(${c.risk}, "Risk per trade (% of equity)", minval=0.1, maxval=10, step=0.1)
+atrLen = input.int(${c.atr}, "ATR length", minval=1)
+slMult = input.float(${c.sl}, "Stop loss (ATR multiples)", minval=0.1, step=0.1)
+rr = input.float(${c.rr}, "Take profit (multiple of stop)", minval=0.2, step=0.1)
+trendLen = input.int(${c.trend}, "Trend EMA (0 = off)", minval=0)
+startH = input.int(${c.start}, "Session start hour", minval=0, maxval=23)
+endH = input.int(${c.end}, "Session end hour (same as start = always on)", minval=0, maxval=24)
+exitOpp = input.bool(${c.exitOpp}, "Close on opposite signal")
+${I}
+
+atr = ta.atr(atrLen)
+trendMA = ta.ema(close, math.max(trendLen, 1))
+plot(trendLen > 0 ? trendMA : na, "Trend EMA", color.gray)
+inSession = startH == endH or (startH < endH ? (hour >= startH and hour < endH) : (hour >= startH or hour < endH))
+${B[c.sig]}
+
+slDist = atr * slMult
+qty = slDist > 0 ? strategy.equity * riskPct / 100 / slDist : 0
+canTrade = barstate.isconfirmed and qty > 0 and inSession and strategy.position_size == 0
+longOk = dirMode != "Short only" and (trendLen == 0 or close > trendMA)
+shortOk = dirMode != "Long only" and (trendLen == 0 or close < trendMA)
+
+if exitOpp and strategy.position_size > 0 and shortSig
+    strategy.close("Long")
+if exitOpp and strategy.position_size < 0 and longSig
+    strategy.close("Short")
+
+if canTrade and longSig and longOk
+    strategy.entry("Long", strategy.long, qty=qty, alert_message='{"action":"buy","symbol":"{{ticker}}"}')
+    strategy.exit("Long exit", "Long", stop=close - slDist, limit=close + slDist * rr)
+if canTrade and shortSig and shortOk
+    strategy.entry("Short", strategy.short, qty=qty, alert_message='{"action":"sell","symbol":"{{ticker}}"}')
+    strategy.exit("Short exit", "Short", stop=close + slDist, limit=close - slDist * rr)
+`;
+}
+
+function mql(c){
+  const S=SIG[c.sig],I=S.L.map((l,i)=>"input "+(S.T[i]==="f"?"double":"int")+" P"+(i+1)+" = "+(S.T[i]==="f"?c.p[i].toFixed(1):c.p[i])+"; // "+l).join("\n");
+  const H={ma:"hA=iMA(_Symbol,_Period,P1,0,MODE_EMA,PRICE_CLOSE); hB=iMA(_Symbol,_Period,P2,0,MODE_EMA,PRICE_CLOSE);",rsi:"hA=iRSI(_Symbol,_Period,P1,PRICE_CLOSE);",macd:"hA=iMACD(_Symbol,_Period,P1,P2,P3,PRICE_CLOSE);",bb:"hA=iBands(_Symbol,_Period,P1,0,P2,PRICE_CLOSE);",break:""};
+  const G={
+   ma:"double f1=Val(hA,0,1),f2=Val(hA,0,2),s1=Val(hB,0,1),s2=Val(hB,0,2);\n   if(f1==EMPTY_VALUE||f2==EMPTY_VALUE||s1==EMPTY_VALUE||s2==EMPTY_VALUE) return 0;\n   if(f1>s1 && f2<=s2) return 1;\n   if(f1<s1 && f2>=s2) return -1;\n   return 0;",
+   rsi:"double r1=Val(hA,0,1),r2=Val(hA,0,2);\n   if(r1==EMPTY_VALUE||r2==EMPTY_VALUE) return 0;\n   if(r2<P2 && r1>=P2) return 1;\n   if(r2>P3 && r1<=P3) return -1;\n   return 0;",
+   macd:"double m1=Val(hA,0,1),m2=Val(hA,0,2),s1=Val(hA,1,1),s2=Val(hA,1,2);\n   if(m1==EMPTY_VALUE||m2==EMPTY_VALUE||s1==EMPTY_VALUE||s2==EMPTY_VALUE) return 0;\n   if(m1>s1 && m2<=s2) return 1;\n   if(m1<s1 && m2>=s2) return -1;\n   return 0;",
+   bb:"double up=Val(hA,1,1),lo=Val(hA,2,1),c1=iClose(_Symbol,_Period,1);\n   if(up==EMPTY_VALUE||lo==EMPTY_VALUE) return 0;\n   if(c1<lo) return 1;\n   if(c1>up) return -1;\n   return 0;",
+   break:"int ih=iHighest(_Symbol,_Period,MODE_HIGH,P1,2), il=iLowest(_Symbol,_Period,MODE_LOW,P1,2);\n   if(ih<0||il<0) return 0;\n   double c1=iClose(_Symbol,_Period,1);\n   if(c1>iHigh(_Symbol,_Period,ih)) return 1;\n   if(c1<iLow(_Symbol,_Period,il)) return -1;\n   return 0;"};
+  return `//+------------------------------------------------------------------+
+//| ${c.name}
+//| Generated by Botsmith. Test on a demo account first.
+//+------------------------------------------------------------------+
+#property copyright "Botsmith"
+#property version   "1.00"
+#include <Trade/Trade.mqh>
+
+input int    Mode         = ${c.dir};   // 0 = long and short, 1 = long only, 2 = short only
+input double RiskPercent  = ${c.risk.toFixed(1)};   // Risk per trade, % of equity
+input int    ATRLen       = ${c.atr};
+input double SLATR        = ${c.sl.toFixed(1)};   // Stop loss, ATR multiples
+input double RR           = ${c.rr.toFixed(1)};   // Take profit, multiple of stop
+input int    TrendEMA     = ${c.trend};   // 0 = off
+input int    StartHour    = ${c.start};   // Trading window, server time
+input int    EndHour      = ${c.end};   // Same as start = always on
+input bool   ExitOpposite = ${c.exitOpp};
+input ulong  Magic        = 260601;
+${I}
+
+CTrade trade;
+int hA=INVALID_HANDLE, hB=INVALID_HANDLE, hATR=INVALID_HANDLE, hTr=INVALID_HANDLE;
+datetime lastBar=0;
+
+int OnInit()
+{
+   trade.SetExpertMagicNumber(Magic);
+   hATR=iATR(_Symbol,_Period,ATRLen);
+   if(TrendEMA>0) hTr=iMA(_Symbol,_Period,TrendEMA,0,MODE_EMA,PRICE_CLOSE);
+   ${H[c.sig]}
+   if(hATR==INVALID_HANDLE) return INIT_FAILED;
+   return INIT_SUCCEEDED;
+}
+
+void OnDeinit(const int reason)
+{
+   if(hA!=INVALID_HANDLE) IndicatorRelease(hA);
+   if(hB!=INVALID_HANDLE) IndicatorRelease(hB);
+   if(hATR!=INVALID_HANDLE) IndicatorRelease(hATR);
+   if(hTr!=INVALID_HANDLE) IndicatorRelease(hTr);
+}
+
+double Val(int h,int buf,int shift)
+{
+   double b[1];
+   if(h==INVALID_HANDLE || CopyBuffer(h,buf,shift,1,b)!=1) return EMPTY_VALUE;
+   return b[0];
+}
+
+// 1 = buy, -1 = sell, 0 = none (uses the last two closed bars)
+int Signal()
+{
+   ${G[c.sig]}
+}
+
+int Dir()
+{
+   for(int i=PositionsTotal()-1;i>=0;i--)
+   {
+      ulong tk=PositionGetTicket(i);
+      if(tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==(long)Magic)
+         return PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY ? 1 : -1;
+   }
+   return 0;
+}
+
+void CloseMine()
+{
+   for(int i=PositionsTotal()-1;i>=0;i--)
+   {
+      ulong tk=PositionGetTicket(i);
+      if(tk>0 && PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==(long)Magic)
+         trade.PositionClose(tk);
+   }
+}
+
+bool InWindow()
+{
+   if(StartHour==EndHour) return true;
+   MqlDateTime dt; TimeToStruct(TimeCurrent(),dt);
+   if(StartHour<EndHour) return dt.hour>=StartHour && dt.hour<EndHour;
+   return dt.hour>=StartHour || dt.hour<EndHour;
+}
+
+// Position size so that hitting the stop loses RiskPercent of equity
+double Lots(double slDist)
+{
+   double tv=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_VALUE), ts=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
+   if(tv<=0 || ts<=0 || slDist<=0) return 0;
+   double risk=AccountInfoDouble(ACCOUNT_EQUITY)*RiskPercent/100.0;
+   double lots=risk/((slDist/ts)*tv);
+   double st=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP), mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN), mx=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX);
+   lots=MathFloor(lots/st)*st;
+   if(lots<mn) return 0;   // skip the trade rather than risk more than planned
+   return MathMin(lots,mx);
+}
+
+void Open(int dir)
+{
+   double atr=Val(hATR,0,1);
+   if(atr==EMPTY_VALUE || atr<=0) return;
+   double sl=atr*SLATR, tp=sl*RR;
+   double lots=Lots(sl);
+   if(lots<=0) return;
+   int dg=(int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS);
+   if(dir>0)
+   {
+      double p=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
+      trade.Buy(lots,_Symbol,p,NormalizeDouble(p-sl,dg),NormalizeDouble(p+tp,dg));
+   }
+   else
+   {
+      double p=SymbolInfoDouble(_Symbol,SYMBOL_BID);
+      trade.Sell(lots,_Symbol,p,NormalizeDouble(p+sl,dg),NormalizeDouble(p-tp,dg));
+   }
+}
+
+void OnTick()
+{
+   datetime t=iTime(_Symbol,_Period,0);
+   if(t==lastBar) return;          // act once per new bar
+   lastBar=t;
+   int sig=Signal(), d=Dir();
+   if(ExitOpposite && d!=0 && sig==-d){ CloseMine(); d=0; }
+   if(sig==0 || d!=0 || !InWindow()) return;
+   if(sig>0 && Mode==2) return;
+   if(sig<0 && Mode==1) return;
+   if(TrendEMA>0)
+   {
+      double te=Val(hTr,0,1), c1=iClose(_Symbol,_Period,1);
+      if(te==EMPTY_VALUE) return;
+      if(sig>0 && c1<=te) return;
+      if(sig<0 && c1>=te) return;
+   }
+   Open(sig);
+}
+`;
+}
+function gen(){const c=get();G={c,1:pine(c),2:mql(c)};show()}
+function say(t){$("st").textContent=t}
+$("cp").onclick=async()=>{
+  try{await navigator.clipboard.writeText(G[tab]);sayC("Copied.")}
+  catch(e){const r=document.createRange();r.selectNodeContents($("code"));const s=getSelection();s.removeAllRanges();s.addRange(r);sayC("Copy was blocked here. The code is selected, so use your device's copy command.")}
+};
+$("dl").onclick=async()=>{
+  const d=await claude.use("downloads").catch(()=>null);
+  if(!d){sayC("Downloads are not available here. Use Copy code instead.");return}
+  const slug=G.c.name.toLowerCase().replace(/\W+/g,"_").replace(/^_|_$/g,"")||"bot";
+  try{await d.save({filename:slug+(tab===1?".pine":".mq5"),data:G[tab]});sayC("Saved.")}catch(e){sayC("Download was cancelled.")}
+};
+$("ai").onclick=async()=>{
+  const idea=$("idea").value.trim();if(!idea){say("Describe your strategy first.");return}
+  const S=await claude.use("sample").catch(()=>null);
+  if(!S){say("AI setup needs Claude access. Set the options by hand instead.");return}
+  say("Configuring...");
+  try{
+    const r=await S.json('You configure a trading bot from a plain-English idea. Return ONLY JSON: {"name":string,"dir":0|1|2 (0 both,1 long only,2 short only),"sig":"ma"|"rsi"|"macd"|"bb"|"break","p":[numbers],"trend":int EMA length or 0,"atr":int,"sl":number,"rr":number,"risk":number percent,"start":0-23,"end":0-24,"exitOpp":boolean}. p by sig: ma [fast,slow]; rsi [length,oversold,overbought]; macd [fast,slow,signal]; bb [length,deviation]; break [lookback]. Pick the closest available signal. Use conservative defaults (risk 1) when unspecified. Idea: '+idea);
+    if(!SIG[r.sig])throw 0;
+    $("sig").value=r.sig;pars(r.sig,Array.isArray(r.p)?r.p:null);
+    const set=(id,v)=>{if(v!=null&&!isNaN(v))$(id).value=v};
+    if(r.name)$("name").value=String(r.name).slice(0,40);
+    if([0,1,2].includes(r.dir))$("dir").value=r.dir;
+    set("trend",r.trend);set("atr",r.atr);set("sl",r.sl);set("rr",r.rr);set("risk",r.risk);set("start",r.start);set("end",r.end);
+    if(typeof r.exitOpp==="boolean")$("exit").checked=r.exitOpp;
+    gen();say("Settings filled in. Check them below, then copy the code.");
+  }catch(e){say("Could not read that idea. Try describing the entry signal and risk more plainly.")}
+};
+$("rv").onclick=async()=>{openSheet("shR");
+  const S=await claude.use("sample").catch(()=>null),o=$("rev");o.classList.remove("hide");
+  if(!S){o.textContent="Reviews need Claude access.";return}
+  o.textContent="Reviewing...";
+  try{const r=await S("Review this trading bot configuration like a cautious risk manager. In under 130 words, list the main weaknesses, market conditions where it likely fails, and 2 concrete changes to test in a backtest. Do not promise profits.\n"+JSON.stringify(G.c)+"\nSignal: "+SIG[G.c.sig].h,{onText:({text})=>{o.textContent=text}});o.textContent=r.text}
+  catch(e){o.textContent="Could not review right now. Try again."}
+};
+agInit();build();gen();ready=true;
+</script></body></html>
